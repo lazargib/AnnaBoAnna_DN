@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>З Днем Народження, Анно 🎉</title>
+<style>
+html,body{
+  margin:0;padding:0;height:100%;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,#0f1226,#26103a);
+  color:#fff; overflow:hidden;
+}
+
+.scene{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1.2s ease;
+}
+
+.scene.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.quote{
+  font-size:26px;
+  max-width:700px;
+  line-height:1.4;
+  margin-bottom:40px;
+  color:#ffd1ea;
+}
+
+.btn{
+  padding:14px 28px;
+  background:#ff66cc;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(255,102,204,.35);
+}
+
+/* ---- FINAL SCENE ---- */
+.header{
+  position:absolute;
+  top:15px;
+  width:100%;
+  text-align:center;
+}
+.header h1{margin:0;color:#ff66cc;}
+.header p{margin-top:6px;}
+
+.container{
+  display:flex;
+  width:100%;
+  height:100%;
+}
+
+.left,.right{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+canvas{position:absolute;inset:0;}
+
+.cake{position:relative;width:200px;height:200px;}
+.cake-layer{
+  position:absolute;left:50%;
+  transform:translateX(-50%);
+  border-radius:12px;
+  transition:height .8s;
+}
+#layer1{width:180px;height:0;background:#ff9999;bottom:0;}
+#layer2{width:140px;height:0;background:#ffbaba;bottom:60px;}
+#layer3{width:100px;height:0;background:#ffccee;bottom:110px;}
+#candle{
+  width:12px;height:0;background:#fff;
+  position:absolute;left:50%;
+  transform:translateX(-50%);
+  bottom:160px;border-radius:4px;
+  transition:height .6s;
+}
+.flame{
+  width:8px;height:12px;
+  background:orange;border-radius:50%;
+  position:absolute;top:-12px;left:50%;
+  margin-left:-4px;opacity:0;
+  animation:flame .5s infinite alternate;
+}
+@keyframes flame{to{transform:translateY(-4px)}}
+
+/* --- Кульки святкові --- */
+.balloon{
+  width:60px;
+  height:70px;
+  border-radius:90%;
+  position:absolute;
+  bottom:300px; /* трохи вище від попереднього */
+  opacity:0;
+  transform:scale(0);
+  transition:all 0.6s ease;
+}
+.balloon.red{background:#ff4da6;}
+.balloon.yellow{background:#ffd11a;}
+.balloon.blue{background:#66ccff;}
+.balloon.green{background:#99ff66;}
+.balloon.pink{background:#ff6666;}
+</style>
+</head>
+<body>
+
+<!-- SCENES -->
+<div class="scene active" id="s1">
+  <div class="quote">«Час — це не те, що минає. Це те, що нас формує»</div>
+  <button class="btn" onclick="next(true)">Далі</button>
+</div>
+
+<div class="scene" id="s2">
+  <div class="quote">«Ми не помічаємо часу… доки він не залишає слід»</div>
+  <button class="btn" onclick="next()">Далі</button>
+</div>
+
+<div class="scene" id="s3">
+  <div class="quote">«Справжні моменти — ті, що ми памʼятаємо»</div>
+  <button class="btn" onclick="next()">Далі</button>
+</div>
+
+<!-- FINAL -->
+<div class="scene" id="final">
+  <div class="header">
+    <h1>З Днем Народження, Анно 🎉</h1>
+    <p id="ageText"></p>
+  </div>
+
+  <div class="container">
+    <div class="left">
+      <canvas id="party"></canvas>
+    </div>
+    <div class="right" style="position:relative; display:flex; align-items:center;">
+      
+      <!-- Святкові кульки ліворуч від торта -->
+      <div class="balloon red" id="b1" style="left:-200px;"></div>
+      <div class="balloon yellow" id="b2" style="left:-170px;"></div>
+      <div class="balloon blue" id="b3" style="left:-140px;"></div>
+      <div class="balloon green" id="b4" style="left:-110px;"></div>
+      <div class="balloon pink" id="b5" style="left:-80px;"></div>
+
+      <!-- Торт -->
+      <div class="cake">
+        <div class="cake-layer" id="layer1"></div>
+        <div class="cake-layer" id="layer2"></div>
+        <div class="cake-layer" id="layer3"></div>
+        <div id="candle"><div class="flame" id="flame"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="btn" style="position:absolute;bottom:25px" id="celebrateBtn">🎉 Celebrate!</button>
+</div>
+
+<audio id="bg" src="HansZimmerTime.mp3" preload="auto"></audio>
+
+<script>
+let index=1;
+function next(playMusic=false){
+  document.getElementById('s'+index)?.classList.remove('active');
+  index++;
+  const el=document.getElementById(index===4?'final':'s'+index);
+  el.classList.add('active');
+  if(playMusic){
+    const bg=document.getElementById('bg');
+    bg.volume=.5; 
+    bg.play().catch(()=>{});
+  }
+}
+
+/* --- TIMER --- */
+const birthYear=new Date().getFullYear()-29;
+const birthDate=new Date(birthYear,0,1);
+function updateAge(){
+  const d=Date.now()-birthDate;
+  const days=Math.floor(d/86400000);
+  const h=Math.floor(d%86400000/3600000);
+  const m=Math.floor(d%3600000/60000);
+  const s=Math.floor(d%60000/1000);
+  ageText.textContent=`29 років — ${days} днів ${h} год ${m} хв ${s} сек`;
+}
+setInterval(updateAge,1000); updateAge();
+
+/* --- CELEBRATE --- */
+celebrateBtn.onclick=()=>{
+  layer1.style.height='100px';
+  setTimeout(()=>layer2.style.height='70px',700);
+  setTimeout(()=>layer3.style.height='50px',1400);
+  setTimeout(()=>{ candle.style.height='30px'; flame.style.opacity=1; },2000);
+
+  // Анімація кульок циклічна
+  const balloons = [b1,b2,b3,b4,b5];
+  balloons.forEach((b,i)=>{
+    setInterval(()=>{
+      // Появлення
+      b.style.opacity=1;
+      b.style.transform=`scale(1) translateY(-${50 + Math.random()*50}px)`;
+      setTimeout(()=>{
+        // "вибух" і повернення
+        b.style.opacity=0;
+        b.style.transform=`scale(0) translateY(0px)`;
+      },800 + Math.random()*400);
+    }, i*400 + 1000); 
+  });
+};
+</script>
+
+</body>
+</html>
+
+
+
+
+
